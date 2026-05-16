@@ -1,3 +1,5 @@
+using EventPlanner.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 const string FrontendCorsPolicy = "Frontend";
@@ -10,6 +12,7 @@ var allowedOrigins = builder.Configuration
     .ToArray();
 
 builder.Services.AddControllers();
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(

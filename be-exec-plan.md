@@ -114,22 +114,18 @@ Execution rule:
 
 Use EF Core.
 
-Recommended local database:
+Local database:
 
-- SQLite for simple local setup.
-
-Optional production database:
-
-- Azure SQL, SQL Server, or PostgreSQL.
+- PostgreSQL, using the Npgsql EF Core provider.
 
 Keep the provider isolated in Infrastructure so it can be swapped later.
 
 Main persistence files:
 
 ```txt
-EventPlannerDbContext
-EntityConfigurations/CalendarEventConfiguration
-EntityConfigurations/UserConfiguration
+Persistence/EventPlannerDbContext
+Persistence/Configurations/CalendarEventConfiguration
+Persistence/Configurations/UserConfiguration
 Repositories/EventRepository
 Repositories/UserRepository
 ```
@@ -323,7 +319,7 @@ Output:
 
 ## Week 3 - EF Core And Event CRUD [In-Progress]
 
-### Task 1 - Configure EF Core
+### Task 1 - Configure EF Core [Completed]
 
 Actions:
 
@@ -544,8 +540,8 @@ When starting backend implementation, do this first:
 1. Convert `event-planner-be` into an ASP.NET Core Web API. [Completed]
 2. Create the solution and layered projects. [Completed]
 3. Add Domain entities and enums. [Completed]
-4. Add Application DTOs and interfaces.
-5. Add Infrastructure EF Core setup.
+4. Add Application DTOs and interfaces. [Completed]
+5. Add Infrastructure EF Core setup. [Completed]
 6. Add API controllers and DI.
 7. Implement event CRUD.
 8. Add seed data.
@@ -561,7 +557,7 @@ Microsoft.AspNetCore.OpenApi
 Swashbuckle.AspNetCore
 Microsoft.EntityFrameworkCore
 Microsoft.EntityFrameworkCore.Design
-Microsoft.EntityFrameworkCore.Sqlite
+Npgsql.EntityFrameworkCore.PostgreSQL
 Microsoft.AspNetCore.Authentication.JwtBearer
 ```
 
