@@ -266,7 +266,7 @@ Acceptance criteria:
 - Backend can create C# DTOs and controllers from the contract.
 - Event CRUD and future auth endpoints are documented.
 
-## Week 2 - ASP.NET Core Web API, DI, And Foundation
+## Week 2 - ASP.NET Core Web API, DI, And Foundation [Completed]
 
 ### Task 1 - Initialize ASP.NET Core Web API [Completed]
 
@@ -309,7 +309,7 @@ Output:
 - Domain layer contains the core model.
 - Entities are independent from EF Core and ASP.NET.
 
-### Task 3 - Add DTO Skeletons
+### Task 3 - Add DTO Skeletons [Completed]
 
 Actions:
 
@@ -321,7 +321,7 @@ Output:
 - Application layer contains contract DTOs.
 - Controllers can use DTOs without exposing domain or EF entities directly.
 
-## Week 3 - EF Core And Event CRUD
+## Week 3 - EF Core And Event CRUD [In-Progress]
 
 ### Task 1 - Configure EF Core
 
@@ -543,7 +543,7 @@ When starting backend implementation, do this first:
 
 1. Convert `event-planner-be` into an ASP.NET Core Web API. [Completed]
 2. Create the solution and layered projects. [Completed]
-3. Add Domain entities and enums.
+3. Add Domain entities and enums. [Completed]
 4. Add Application DTOs and interfaces.
 5. Add Infrastructure EF Core setup.
 6. Add API controllers and DI.
