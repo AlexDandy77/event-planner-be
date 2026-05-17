@@ -1,3 +1,5 @@
+using EventPlanner.Api.Middleware;
+using EventPlanner.Application;
 using EventPlanner.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,7 @@ var allowedOrigins = builder.Configuration
     .ToArray();
 
 builder.Services.AddControllers();
+builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddCors(options =>
 {
@@ -34,6 +37,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseCors(FrontendCorsPolicy);
 

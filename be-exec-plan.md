@@ -317,7 +317,7 @@ Output:
 - Application layer contains contract DTOs.
 - Controllers can use DTOs without exposing domain or EF entities directly.
 
-## Week 3 - EF Core And Event CRUD [In-Progress]
+## Week 3 - EF Core And Event CRUD [Completed]
 
 ### Task 1 - Configure EF Core [Completed]
 
@@ -334,7 +334,7 @@ Output:
 - Database can be created locally.
 - Static frontend integration can be replaced by the real event list endpoint.
 
-### Task 2 - Implement Event CRUD
+### Task 2 - Implement Event CRUD [Completed]
 
 Actions:
 

@@ -1,4 +1,8 @@
+using EventPlanner.Application.Common.Abstractions;
+using EventPlanner.Application.Events.Repositories;
 using EventPlanner.Infrastructure.Persistence;
+using EventPlanner.Infrastructure.Persistence.Repositories;
+using EventPlanner.Infrastructure.Time;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -26,6 +30,9 @@ public static class DependencyInjection
         {
             options.UseNpgsql(connectionString);
         });
+
+        services.AddScoped<IEventRepository, EventRepository>();
+        services.AddSingleton<IClock, SystemClock>();
 
         return services;
     }
