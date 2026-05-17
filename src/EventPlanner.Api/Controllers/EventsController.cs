@@ -13,10 +13,11 @@ public sealed class EventsController(IEventService eventService) : ControllerBas
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<EventResponse>>> GetAll(
+        [FromQuery] EventQueryParameters queryParameters,
         CancellationToken cancellationToken
     )
     {
-        var events = await _eventService.GetEventsAsync(cancellationToken);
+        var events = await _eventService.GetEventsAsync(queryParameters, cancellationToken);
 
         return Ok(events);
     }

@@ -1,5 +1,8 @@
 using EventPlanner.Application.Common.Abstractions;
+using EventPlanner.Application.Common.Dtos;
+using EventPlanner.Application.Common.Exceptions;
 using EventPlanner.Application.Events.Dtos;
+using EventPlanner.Application.Events.Queries;
 using EventPlanner.Application.Events.Repositories;
 using EventPlanner.Application.Events.Services;
 using EventPlanner.Domain.Entities;
@@ -12,6 +15,71 @@ public sealed class EventServiceTests
     private static readonly DateTimeOffset FixedNow = DateTimeOffset.Parse(
         "2026-05-20T10:00:00Z"
     );
+
+    [Fact]
+    public async Task GetEventsAsync_ShouldNormalizeQueryParameters()
+    {
+        var repository = new FakeEventRepository();
+        var service = new EventService(repository, new FixedClock(FixedNow));
+
+        await service.GetEventsAsync(
+            new EventQueryParameters
+            {
+                From = FixedNow,
+                To = FixedNow.AddDays(7),
+                Category = "WORKSHOP",
+                Search = " planning ",
+                SortBy = "TITLE",
+                SortDirection = "DESC"
+            },
+            CancellationToken.None
+        );
+
+        Assert.NotNull(repository.LastQuery);
+        Assert.Equal(FixedNow, repository.LastQuery.From);
+        Assert.Equal(FixedNow.AddDays(7), repository.LastQuery.To);
+        Assert.Equal(EventCategory.Workshop, repository.LastQuery.Category);
+        Assert.Equal("planning", repository.LastQuery.Search);
+        Assert.Equal(EventSortFields.Title, repository.LastQuery.SortBy);
+        Assert.Equal(SortDirections.Desc, repository.LastQuery.SortDirection);
+    }
+
+    [Fact]
+    public async Task GetEventsAsync_ShouldThrow_WhenQueryDateRangeIsInvalid()
+    {
+        var repository = new FakeEventRepository();
+        var service = new EventService(repository, new FixedClock(FixedNow));
+
+        var getEvents = () =>
+            service.GetEventsAsync(
+                new EventQueryParameters
+                {
+                    From = FixedNow.AddDays(1),
+                    To = FixedNow
+                },
+                CancellationToken.None
+            );
+
+        await Assert.ThrowsAsync<ApplicationValidationException>(getEvents);
+    }
+
+    [Fact]
+    public async Task GetEventsAsync_ShouldThrow_WhenSortFieldIsUnsupported()
+    {
+        var repository = new FakeEventRepository();
+        var service = new EventService(repository, new FixedClock(FixedNow));
+
+        var getEvents = () =>
+            service.GetEventsAsync(
+                new EventQueryParameters
+                {
+                    SortBy = "priority"
+                },
+                CancellationToken.None
+            );
+
+        await Assert.ThrowsAsync<ApplicationValidationException>(getEvents);
+    }
 
     [Fact]
     public async Task CreateEventAsync_ShouldCreateEventWithDevelopmentOrganizer()
@@ -96,10 +164,17 @@ public sealed class EventServiceTests
     {
         public List<CalendarEvent> Events { get; } = [.. events];
 
+        public EventQuery? LastQuery { get; private set; }
+
         public int SaveChangesCallCount { get; private set; }
 
-        public Task<IReadOnlyList<CalendarEvent>> GetAllAsync(CancellationToken cancellationToken)
+        public Task<IReadOnlyList<CalendarEvent>> GetAllAsync(
+            EventQuery query,
+            CancellationToken cancellationToken
+        )
         {
+            LastQuery = query;
+
             var events = Events
                 .Where(calendarEvent => !calendarEvent.IsDeleted)
                 .OrderBy(calendarEvent => calendarEvent.StartDateTime)

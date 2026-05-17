@@ -358,9 +358,9 @@ Acceptance criteria:
 - Deleted events are soft-deleted.
 - Controllers delegate business work to Application services.
 
-## Week 4 - LINQ, Filtering, And Sorting
+## Week 4 - LINQ, Filtering, And Sorting [In-Progress]
 
-### Task 1 - Add Query Parameters
+### Task 1 - Add Query Parameters [Completed]
 
 Actions:
 

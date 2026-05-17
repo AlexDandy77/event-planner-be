@@ -4,7 +4,10 @@ namespace EventPlanner.Application.Events.Services;
 
 public interface IEventService
 {
-    Task<IReadOnlyList<EventResponse>> GetEventsAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyList<EventResponse>> GetEventsAsync(
+        EventQueryParameters queryParameters,
+        CancellationToken cancellationToken
+    );
 
     Task<EventResponse?> GetEventByIdAsync(Guid id, CancellationToken cancellationToken);
 

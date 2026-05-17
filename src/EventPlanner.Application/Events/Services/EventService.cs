@@ -1,9 +1,12 @@
 using EventPlanner.Application.Common.Abstractions;
+using EventPlanner.Application.Common.Dtos;
 using EventPlanner.Application.Common.Exceptions;
 using EventPlanner.Application.Events.Dtos;
 using EventPlanner.Application.Events.Mapping;
+using EventPlanner.Application.Events.Queries;
 using EventPlanner.Application.Events.Repositories;
 using EventPlanner.Domain.Entities;
+using EventPlanner.Domain.Enums;
 
 namespace EventPlanner.Application.Events.Services;
 
@@ -17,10 +20,12 @@ public sealed class EventService(IEventRepository eventRepository, IClock clock)
     private readonly IEventRepository _eventRepository = eventRepository;
 
     public async Task<IReadOnlyList<EventResponse>> GetEventsAsync(
+        EventQueryParameters queryParameters,
         CancellationToken cancellationToken
     )
     {
-        var events = await _eventRepository.GetAllAsync(cancellationToken);
+        var query = BuildQuery(queryParameters);
+        var events = await _eventRepository.GetAllAsync(query, cancellationToken);
 
         return [.. events.Select(EventMapper.ToResponse)];
     }
@@ -114,5 +119,84 @@ public sealed class EventService(IEventRepository eventRepository, IClock clock)
         }
 
         return value;
+    }
+
+    private static EventQuery BuildQuery(EventQueryParameters queryParameters)
+    {
+        if (
+            queryParameters.From.HasValue
+            && queryParameters.To.HasValue
+            && queryParameters.From >= queryParameters.To
+        )
+        {
+            throw new ApplicationValidationException(
+                "Query parameter 'from' must be earlier than 'to'."
+            );
+        }
+
+        EventCategory? category = string.IsNullOrWhiteSpace(queryParameters.Category)
+            ? null
+            : EventCategoryMapper.ToDomainValue(queryParameters.Category);
+
+        return new EventQuery(
+            queryParameters.From,
+            queryParameters.To,
+            category,
+            NormalizeSearch(queryParameters.Search),
+            NormalizeSortBy(queryParameters.SortBy),
+            NormalizeSortDirection(queryParameters.SortDirection)
+        );
+    }
+
+    private static string? NormalizeSearch(string? search)
+    {
+        return string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+    }
+
+    private static string NormalizeSortBy(string? sortBy)
+    {
+        if (string.IsNullOrWhiteSpace(sortBy))
+        {
+            return EventSortFields.StartDateTime;
+        }
+
+        if (sortBy.Equals(EventSortFields.StartDateTime, StringComparison.OrdinalIgnoreCase))
+        {
+            return EventSortFields.StartDateTime;
+        }
+
+        if (sortBy.Equals(EventSortFields.Title, StringComparison.OrdinalIgnoreCase))
+        {
+            return EventSortFields.Title;
+        }
+
+        if (sortBy.Equals(EventSortFields.CreatedAt, StringComparison.OrdinalIgnoreCase))
+        {
+            return EventSortFields.CreatedAt;
+        }
+
+        throw new ApplicationValidationException($"Sort field '{sortBy}' is not supported.");
+    }
+
+    private static string NormalizeSortDirection(string? sortDirection)
+    {
+        if (string.IsNullOrWhiteSpace(sortDirection))
+        {
+            return SortDirections.Asc;
+        }
+
+        if (sortDirection.Equals(SortDirections.Asc, StringComparison.OrdinalIgnoreCase))
+        {
+            return SortDirections.Asc;
+        }
+
+        if (sortDirection.Equals(SortDirections.Desc, StringComparison.OrdinalIgnoreCase))
+        {
+            return SortDirections.Desc;
+        }
+
+        throw new ApplicationValidationException(
+            $"Sort direction '{sortDirection}' is not supported."
+        );
     }
 }
