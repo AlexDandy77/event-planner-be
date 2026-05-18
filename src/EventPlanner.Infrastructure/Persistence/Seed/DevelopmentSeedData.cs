@@ -7,6 +7,9 @@ namespace EventPlanner.Infrastructure.Persistence.Seed;
 
 internal static class DevelopmentSeedData
 {
+    private const string DevelopmentPasswordHash =
+        "$2a$11$bq03k3pdNQVI7wxW4ozA4u8HGCQKFLNA9DEYrzVecbmx.0gv40ShW";
+
     private static readonly Guid OrganizerId = Guid.Parse("8a5edca7-8f80-4ed6-8b91-01863782b51b");
     private static readonly Guid AdminId = Guid.Parse("f1a70547-12ce-4d4f-b5b1-a22cb6efdf5d");
     private static readonly Guid CommunityOrganizerId = Guid.Parse(
@@ -40,7 +43,7 @@ internal static class DevelopmentSeedData
                 Email = "organizer@example.com",
                 Role = UserRole.Organizer,
                 Phone = "+37360000000",
-                PasswordHash = "development-password-hash",
+                PasswordHash = DevelopmentPasswordHash,
                 IsActive = true,
                 CreatedAt = SeededAt,
                 UpdatedAt = SeededAt
@@ -53,7 +56,7 @@ internal static class DevelopmentSeedData
                 Email = "admin@example.com",
                 Role = UserRole.Admin,
                 Phone = "+37360000001",
-                PasswordHash = "development-password-hash",
+                PasswordHash = DevelopmentPasswordHash,
                 IsActive = true,
                 CreatedAt = SeededAt,
                 UpdatedAt = SeededAt
@@ -66,7 +69,7 @@ internal static class DevelopmentSeedData
                 Email = "mara.community@example.com",
                 Role = UserRole.Organizer,
                 Phone = "+37360000002",
-                PasswordHash = "development-password-hash",
+                PasswordHash = DevelopmentPasswordHash,
                 IsActive = true,
                 CreatedAt = SeededAt,
                 UpdatedAt = SeededAt
@@ -79,7 +82,7 @@ internal static class DevelopmentSeedData
                 Email = "victor.design@example.com",
                 Role = UserRole.Organizer,
                 Phone = "+37360000003",
-                PasswordHash = "development-password-hash",
+                PasswordHash = DevelopmentPasswordHash,
                 IsActive = true,
                 CreatedAt = SeededAt,
                 UpdatedAt = SeededAt
@@ -92,7 +95,7 @@ internal static class DevelopmentSeedData
                 Email = "nina.operations@example.com",
                 Role = UserRole.Organizer,
                 Phone = "+37360000004",
-                PasswordHash = "development-password-hash",
+                PasswordHash = DevelopmentPasswordHash,
                 IsActive = true,
                 CreatedAt = SeededAt,
                 UpdatedAt = SeededAt

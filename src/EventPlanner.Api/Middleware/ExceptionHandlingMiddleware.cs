@@ -29,6 +29,18 @@ public sealed class ExceptionHandlingMiddleware(
     {
         var (statusCode, title, detail, shouldLogAsError) = exception switch
         {
+            ApplicationAuthenticationException => (
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                exception.Message,
+                false
+            ),
+            ApplicationConflictException => (
+                StatusCodes.Status409Conflict,
+                "Conflict",
+                exception.Message,
+                false
+            ),
             ApplicationValidationException => (
                 StatusCodes.Status400BadRequest,
                 "Bad Request",

@@ -421,7 +421,7 @@ Output:
 
 - Users can be persisted and queried safely.
 
-### Task 2 - Add Register, Login, And Me
+### Task 2 - Add Register, Login, And Me [Completed]
 
 Actions:
 
