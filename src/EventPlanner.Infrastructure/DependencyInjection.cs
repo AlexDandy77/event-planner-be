@@ -1,5 +1,6 @@
 using EventPlanner.Application.Common.Abstractions;
 using EventPlanner.Application.Events.Repositories;
+using EventPlanner.Application.Users.Repositories;
 using EventPlanner.Infrastructure.Persistence;
 using EventPlanner.Infrastructure.Persistence.Repositories;
 using EventPlanner.Infrastructure.Time;
@@ -32,6 +33,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddSingleton<IClock, SystemClock>();
 
         return services;

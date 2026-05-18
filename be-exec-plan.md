@@ -408,7 +408,7 @@ Acceptance criteria:
 
 ## Week 5 - AuthN, AuthZ, And Async [In-Progress]
 
-### Task 1 - Add User Persistence
+### Task 1 - Add User Persistence [Completed]
 
 Actions:
 
