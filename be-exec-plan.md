@@ -371,7 +371,7 @@ Output:
 
 - Frontend can request events for visible calendar ranges.
 
-### Task 2 - Centralize Query Logic
+### Task 2 - Centralize Query Logic [Completed]
 
 Actions:
 
@@ -386,7 +386,7 @@ Output:
 
 - Filtering and sorting are reusable and testable.
 
-### Task 3 - Add Query Tests
+### Task 3 - Add Query Tests [Completed]
 
 Actions:
 
@@ -406,7 +406,7 @@ Acceptance criteria:
 - Invalid query values return stable `400 Bad Request` responses.
 - Query logic is not duplicated in controllers.
 
-## Week 5 - AuthN, AuthZ, And Async
+## Week 5 - AuthN, AuthZ, And Async [In-Progress]
 
 ### Task 1 - Add User Persistence
 
@@ -542,9 +542,9 @@ When starting backend implementation, do this first:
 3. Add Domain entities and enums. [Completed]
 4. Add Application DTOs and interfaces. [Completed]
 5. Add Infrastructure EF Core setup. [Completed]
-6. Add API controllers and DI.
-7. Implement event CRUD.
-8. Add seed data.
+6. Add API controllers and DI. [Completed]
+7. Implement event CRUD. [Completed]
+8. Add seed data. [Completed]
 9. Verify with Swagger.
 10. Connect frontend `GET /events`.
 
