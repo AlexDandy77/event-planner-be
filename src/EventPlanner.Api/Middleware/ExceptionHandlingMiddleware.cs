@@ -35,6 +35,12 @@ public sealed class ExceptionHandlingMiddleware(
                 exception.Message,
                 false
             ),
+            ApplicationForbiddenException => (
+                StatusCodes.Status403Forbidden,
+                "Forbidden",
+                exception.Message,
+                false
+            ),
             ApplicationConflictException => (
                 StatusCodes.Status409Conflict,
                 "Conflict",

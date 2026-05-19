@@ -1,6 +1,7 @@
 using EventPlanner.Application.Events.Dtos;
 using EventPlanner.Application.Events.Services;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventPlanner.Api.Controllers;
@@ -38,6 +39,7 @@ public sealed class EventsController(IEventService eventService) : ControllerBas
         return Ok(calendarEvent);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<EventResponse>> Create(
         CreateEventRequest request,
@@ -49,6 +51,7 @@ public sealed class EventsController(IEventService eventService) : ControllerBas
         return CreatedAtAction(nameof(GetById), new { id = calendarEvent.Id }, calendarEvent);
     }
 
+    [Authorize]
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<EventResponse>> Update(
         Guid id,
@@ -66,6 +69,7 @@ public sealed class EventsController(IEventService eventService) : ControllerBas
         return Ok(calendarEvent);
     }
 
+    [Authorize]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {

@@ -82,8 +82,7 @@ Rules:
 ```txt
 Version: v1
 Base path: /api
-Current auth mode: public during initial CRUD
-Future auth mode: JWT protected for authenticated user flows
+Current auth mode: public event reads; JWT protected event writes and user flows
 ```
 
 ## General API Rules
@@ -352,7 +351,7 @@ Default behavior:
 
 - Exclude soft-deleted events.
 - Sort by `startDateTime asc`.
-- When auth is enabled, return events visible to the current user.
+- Event reads are currently public.
 
 Success:
 
@@ -382,7 +381,6 @@ Errors:
 
 ```txt
 400 Bad Request - invalid query parameter
-401 Unauthorized - future auth mode only
 ```
 
 ## GET /api/events/{id}
@@ -402,14 +400,13 @@ Errors:
 ```txt
 400 Bad Request - invalid UUID
 404 Not Found - event does not exist or is deleted
-401 Unauthorized - future auth mode only
 ```
 
 ## POST /api/events
 
 Creates an event.
 
-During initial CRUD, `organizerId` can be assigned from a seeded development organizer. After JWT auth is added, the backend must assign it from the current authenticated user.
+The backend assigns `organizerId` from the current authenticated user.
 
 Request: `CreateEventRequest`
 
@@ -426,7 +423,7 @@ Errors:
 
 ```txt
 400 Bad Request - invalid request body
-401 Unauthorized - future auth mode only
+401 Unauthorized - missing, invalid, or expired token
 ```
 
 ## PUT /api/events/{id}
@@ -447,8 +444,8 @@ Errors:
 
 ```txt
 400 Bad Request - invalid UUID or request body
-401 Unauthorized - future auth mode only
-403 Forbidden - future auth mode, user cannot update this event
+401 Unauthorized - missing, invalid, or expired token
+403 Forbidden - user cannot update this event
 404 Not Found - event does not exist or is deleted
 ```
 
@@ -466,14 +463,14 @@ Errors:
 
 ```txt
 400 Bad Request - invalid UUID
-401 Unauthorized - future auth mode only
-403 Forbidden - future auth mode, user cannot delete this event
+401 Unauthorized - missing, invalid, or expired token
+403 Forbidden - user cannot delete this event
 404 Not Found - event does not exist or is already deleted
 ```
 
 ## Auth Endpoints
 
-Auth is planned for a later backend phase, but the contract is defined now so the frontend can prepare types and services.
+Auth uses JWT bearer tokens.
 
 ## POST /api/auth/register
 

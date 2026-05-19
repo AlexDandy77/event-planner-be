@@ -436,7 +436,7 @@ Output:
 - Frontend can connect login/register pages.
 - JWT token and user context are available.
 
-### Task 3 - Protect Event Endpoints
+### Task 3 - Protect Event Endpoints [Completed]
 
 Actions:
 

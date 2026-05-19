@@ -5,19 +5,23 @@ using EventPlanner.Application.Events.Dtos;
 using EventPlanner.Application.Events.Mapping;
 using EventPlanner.Application.Events.Queries;
 using EventPlanner.Application.Events.Repositories;
+using EventPlanner.Application.Users.Repositories;
 using EventPlanner.Domain.Entities;
 using EventPlanner.Domain.Enums;
 
 namespace EventPlanner.Application.Events.Services;
 
-public sealed class EventService(IEventRepository eventRepository, IClock clock) : IEventService
+public sealed class EventService(
+    IEventRepository eventRepository,
+    IUserRepository userRepository,
+    ICurrentUserService currentUserService,
+    IClock clock
+) : IEventService
 {
-    private static readonly Guid DevelopmentOrganizerId = Guid.Parse(
-        "8a5edca7-8f80-4ed6-8b91-01863782b51b"
-    );
-
     private readonly IClock _clock = clock;
+    private readonly ICurrentUserService _currentUserService = currentUserService;
     private readonly IEventRepository _eventRepository = eventRepository;
+    private readonly IUserRepository _userRepository = userRepository;
 
     public async Task<IReadOnlyList<EventResponse>> GetEventsAsync(
         EventQueryParameters queryParameters,
@@ -45,6 +49,7 @@ public sealed class EventService(IEventRepository eventRepository, IClock clock)
         CancellationToken cancellationToken
     )
     {
+        var currentUser = await GetCurrentActiveUserAsync(cancellationToken);
         var category = EventCategoryMapper.ToDomainValue(request.Category);
         var createdAt = _clock.UtcNow;
 
@@ -54,7 +59,7 @@ public sealed class EventService(IEventRepository eventRepository, IClock clock)
             category,
             request.StartDateTime,
             request.EndDateTime,
-            DevelopmentOrganizerId,
+            currentUser.Id,
             createdAt,
             RequireText(request.Color, "Event color")
         );
@@ -77,6 +82,9 @@ public sealed class EventService(IEventRepository eventRepository, IClock clock)
         {
             return null;
         }
+
+        var currentUser = await GetCurrentActiveUserAsync(cancellationToken);
+        EnsureCanModifyEvent(currentUser, calendarEvent);
 
         var category = EventCategoryMapper.ToDomainValue(request.Category);
 
@@ -104,11 +112,43 @@ public sealed class EventService(IEventRepository eventRepository, IClock clock)
             return false;
         }
 
+        var currentUser = await GetCurrentActiveUserAsync(cancellationToken);
+        EnsureCanModifyEvent(currentUser, calendarEvent);
+
         calendarEvent.Delete(_clock.UtcNow);
 
         await _eventRepository.SaveChangesAsync(cancellationToken);
 
         return true;
+    }
+
+    private async Task<User> GetCurrentActiveUserAsync(CancellationToken cancellationToken)
+    {
+        var currentUserId = _currentUserService.UserId;
+
+        if (!currentUserId.HasValue)
+        {
+            throw new ApplicationAuthenticationException("Authentication is required.");
+        }
+
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId.Value, cancellationToken);
+
+        if (currentUser is null || !currentUser.IsActive)
+        {
+            throw new ApplicationAuthenticationException("Authentication is required.");
+        }
+
+        return currentUser;
+    }
+
+    private static void EnsureCanModifyEvent(User currentUser, CalendarEvent calendarEvent)
+    {
+        if (currentUser.Role == UserRole.Admin || calendarEvent.OrganizerId == currentUser.Id)
+        {
+            return;
+        }
+
+        throw new ApplicationForbiddenException("You cannot modify this event.");
     }
 
     private static string RequireText(string? value, string fieldName)
