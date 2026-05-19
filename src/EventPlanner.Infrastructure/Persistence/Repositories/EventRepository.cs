@@ -16,6 +16,8 @@ public sealed class EventRepository(EventPlannerDbContext dbContext) : IEventRep
         CancellationToken cancellationToken
     )
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var events = _dbContext
             .CalendarEvents
             .AsNoTracking()
@@ -27,9 +29,11 @@ public sealed class EventRepository(EventPlannerDbContext dbContext) : IEventRep
         return await events.ToListAsync(cancellationToken);
     }
 
-    public Task<CalendarEvent?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<CalendarEvent?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return _dbContext.CalendarEvents.FirstOrDefaultAsync(
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return await _dbContext.CalendarEvents.FirstOrDefaultAsync(
             calendarEvent => calendarEvent.Id == id,
             cancellationToken
         );
@@ -37,11 +41,15 @@ public sealed class EventRepository(EventPlannerDbContext dbContext) : IEventRep
 
     public async Task AddAsync(CalendarEvent calendarEvent, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         await _dbContext.CalendarEvents.AddAsync(calendarEvent, cancellationToken);
     }
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken)
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
-        return _dbContext.SaveChangesAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

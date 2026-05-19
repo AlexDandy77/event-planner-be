@@ -406,7 +406,7 @@ Acceptance criteria:
 - Invalid query values return stable `400 Bad Request` responses.
 - Query logic is not duplicated in controllers.
 
-## Week 5 - AuthN, AuthZ, And Async [In-Progress]
+## Week 5 - AuthN, AuthZ, And Async [Completed]
 
 ### Task 1 - Add User Persistence [Completed]
 
@@ -450,7 +450,7 @@ Output:
 - Event ownership starts to matter.
 - Unauthorized writes are blocked.
 
-### Task 4 - Ensure Async Consistency
+### Task 4 - Ensure Async Consistency [Completed]
 
 Actions:
 

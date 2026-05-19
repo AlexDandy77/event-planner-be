@@ -39,6 +39,20 @@ public sealed class UserRepositoryTests
     }
 
     [Fact]
+    public async Task GetByEmailAsync_ShouldThrow_WhenCancellationIsRequestedBeforeValidationReturn()
+    {
+        await using var database = await TestDatabase.CreateAsync();
+        var repository = new UserRepository(database.Context);
+        using var cancellationTokenSource = new CancellationTokenSource();
+        cancellationTokenSource.Cancel();
+
+        var getUser = () =>
+            repository.GetByEmailAsync(" ", cancellationTokenSource.Token);
+
+        await Assert.ThrowsAsync<OperationCanceledException>(getUser);
+    }
+
+    [Fact]
     public async Task AddAsync_ShouldPersistUserWithNormalizedEmail()
     {
         await using var database = await TestDatabase.CreateAsync();

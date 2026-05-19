@@ -9,46 +9,56 @@ public sealed class UserRepository(EventPlannerDbContext dbContext) : IUserRepos
 {
     private readonly EventPlannerDbContext _dbContext = dbContext;
 
-    public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return _dbContext.Users.FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        return await _dbContext.Users.FirstOrDefaultAsync(user => user.Id == id, cancellationToken);
     }
 
-    public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var normalizedEmail = NormalizeEmailForLookup(email);
 
         if (normalizedEmail is null)
         {
-            return Task.FromResult<User?>(null);
+            return null;
         }
 
-        return _dbContext.Users.FirstOrDefaultAsync(
+        return await _dbContext.Users.FirstOrDefaultAsync(
             user => user.Email == normalizedEmail,
             cancellationToken
         );
     }
 
-    public Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken)
+    public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         var normalizedEmail = NormalizeEmailForLookup(email);
 
         if (normalizedEmail is null)
         {
-            return Task.FromResult(false);
+            return false;
         }
 
-        return _dbContext.Users.AnyAsync(user => user.Email == normalizedEmail, cancellationToken);
+        return await _dbContext.Users.AnyAsync(user => user.Email == normalizedEmail, cancellationToken);
     }
 
     public async Task AddAsync(User user, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         await _dbContext.Users.AddAsync(user, cancellationToken);
     }
 
-    public Task SaveChangesAsync(CancellationToken cancellationToken)
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
-        return _dbContext.SaveChangesAsync(cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static string? NormalizeEmailForLookup(string email)
