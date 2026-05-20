@@ -498,7 +498,7 @@ Output:
 - API errors have consistent shape.
 - Controllers do not repeat try/catch blocks.
 
-### Task 3 - Add Test Projects
+### Task 3 - Add Test Projects [Completed]
 
 Actions:
 
@@ -545,7 +545,7 @@ When starting backend implementation, do this first:
 6. Add API controllers and DI. [Completed]
 7. Implement event CRUD. [Completed]
 8. Add seed data. [Completed]
-9. Verify with Swagger.
+9. Verify with Swagger. [Completed]
 10. Connect frontend `GET /events`.
 
 ## Recommended Packages
