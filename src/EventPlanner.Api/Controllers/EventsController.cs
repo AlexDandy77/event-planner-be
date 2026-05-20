@@ -31,11 +31,6 @@ public sealed class EventsController(IEventService eventService) : ControllerBas
     {
         var calendarEvent = await _eventService.GetEventByIdAsync(id, cancellationToken);
 
-        if (calendarEvent is null)
-        {
-            return NotFound();
-        }
-
         return Ok(calendarEvent);
     }
 
@@ -61,11 +56,6 @@ public sealed class EventsController(IEventService eventService) : ControllerBas
     {
         var calendarEvent = await _eventService.UpdateEventAsync(id, request, cancellationToken);
 
-        if (calendarEvent is null)
-        {
-            return NotFound();
-        }
-
         return Ok(calendarEvent);
     }
 
@@ -73,12 +63,7 @@ public sealed class EventsController(IEventService eventService) : ControllerBas
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var wasDeleted = await _eventService.DeleteEventAsync(id, cancellationToken);
-
-        if (!wasDeleted)
-        {
-            return NotFound();
-        }
+        await _eventService.DeleteEventAsync(id, cancellationToken);
 
         return NoContent();
     }

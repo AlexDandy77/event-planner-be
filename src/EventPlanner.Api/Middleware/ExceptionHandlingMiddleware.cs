@@ -1,5 +1,4 @@
-using System.Text.Json;
-
+using EventPlanner.Api.Errors;
 using EventPlanner.Application.Common.Exceptions;
 using EventPlanner.Domain.Common;
 
@@ -12,8 +11,6 @@ public sealed class ExceptionHandlingMiddleware(
     ILogger<ExceptionHandlingMiddleware> logger
     )
 {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-
     private readonly ILogger<ExceptionHandlingMiddleware> _logger = logger;
     private readonly RequestDelegate _next = next;
 
@@ -60,6 +57,12 @@ public sealed class ExceptionHandlingMiddleware(
                 exception.Message,
                 false
             ),
+            ApplicationNotFoundException => (
+                StatusCodes.Status404NotFound,
+                "Not Found",
+                exception.Message,
+                false
+            ),
             DomainException => (
                 StatusCodes.Status400BadRequest,
                 "Bad Request",
@@ -80,26 +83,23 @@ public sealed class ExceptionHandlingMiddleware(
         }
         else
         {
-            _logger.LogWarning(exception, "Request failed with a handled exception.");
+            _logger.LogWarning(
+                "Request failed with handled exception {StatusCode}: {Detail}",
+                statusCode,
+                detail
+            );
         }
 
         var problemDetails = new ProblemDetails
         {
+            Type = $"https://httpstatuses.com/{statusCode}",
             Status = statusCode,
             Title = title,
             Detail = detail,
             Instance = context.Request.Path
         };
 
-        context.Response.StatusCode = statusCode;
-        context.Response.ContentType = "application/problem+json";
-
-        await JsonSerializer.SerializeAsync(
-            context.Response.Body,
-            problemDetails,
-            problemDetails.GetType(),
-            JsonOptions
-        );
+        await ProblemDetailsResponseWriter.WriteAsync(context, problemDetails);
     }
 
     private static async Task WriteValidationProblemAsync(
@@ -122,14 +122,6 @@ public sealed class ExceptionHandlingMiddleware(
             Instance = context.Request.Path
         };
 
-        context.Response.StatusCode = StatusCodes.Status400BadRequest;
-        context.Response.ContentType = "application/problem+json";
-
-        await JsonSerializer.SerializeAsync(
-            context.Response.Body,
-            problemDetails,
-            problemDetails.GetType(),
-            JsonOptions
-        );
+        await ProblemDetailsResponseWriter.WriteAsync(context, problemDetails);
     }
 }

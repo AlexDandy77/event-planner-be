@@ -485,7 +485,7 @@ Output:
 - Invalid payloads fail predictably.
 - Frontend can show clear messages.
 
-### Task 2 - Add Error Middleware
+### Task 2 - Add Error Middleware [Completed]
 
 Actions:
 

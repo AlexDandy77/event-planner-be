@@ -46,14 +46,19 @@ public sealed class EventService(
         return [.. events.Select(EventMapper.ToResponse)];
     }
 
-    public async Task<EventResponse?> GetEventByIdAsync(
+    public async Task<EventResponse> GetEventByIdAsync(
         Guid id,
         CancellationToken cancellationToken
     )
     {
         var calendarEvent = await _eventRepository.GetByIdAsync(id, cancellationToken);
 
-        return calendarEvent is null ? null : EventMapper.ToResponse(calendarEvent);
+        if (calendarEvent is null)
+        {
+            throw EventNotFound(id);
+        }
+
+        return EventMapper.ToResponse(calendarEvent);
     }
 
     public async Task<EventResponse> CreateEventAsync(
@@ -84,7 +89,7 @@ public sealed class EventService(
         return EventMapper.ToResponse(calendarEvent);
     }
 
-    public async Task<EventResponse?> UpdateEventAsync(
+    public async Task<EventResponse> UpdateEventAsync(
         Guid id,
         UpdateEventRequest request,
         CancellationToken cancellationToken
@@ -96,7 +101,7 @@ public sealed class EventService(
 
         if (calendarEvent is null)
         {
-            return null;
+            throw EventNotFound(id);
         }
 
         var currentUser = await GetCurrentActiveUserAsync(cancellationToken);
@@ -119,13 +124,13 @@ public sealed class EventService(
         return EventMapper.ToResponse(calendarEvent);
     }
 
-    public async Task<bool> DeleteEventAsync(Guid id, CancellationToken cancellationToken)
+    public async Task DeleteEventAsync(Guid id, CancellationToken cancellationToken)
     {
         var calendarEvent = await _eventRepository.GetByIdAsync(id, cancellationToken);
 
         if (calendarEvent is null)
         {
-            return false;
+            throw EventNotFound(id);
         }
 
         var currentUser = await GetCurrentActiveUserAsync(cancellationToken);
@@ -134,8 +139,11 @@ public sealed class EventService(
         calendarEvent.Delete(_clock.UtcNow);
 
         await _eventRepository.SaveChangesAsync(cancellationToken);
+    }
 
-        return true;
+    private static ApplicationNotFoundException EventNotFound(Guid id)
+    {
+        return new ApplicationNotFoundException($"Event with id '{id}' was not found.");
     }
 
     private async Task<User> GetCurrentActiveUserAsync(CancellationToken cancellationToken)

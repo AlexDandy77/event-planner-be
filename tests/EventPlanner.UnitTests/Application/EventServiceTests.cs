@@ -136,25 +136,26 @@ public sealed class EventServiceTests
     }
 
     [Fact]
-    public async Task UpdateEventAsync_ShouldReturnNull_WhenEventDoesNotExist()
+    public async Task UpdateEventAsync_ShouldThrowNotFoundException_WhenEventDoesNotExist()
     {
         var repository = new FakeEventRepository();
         var service = CreateService(repository);
 
-        var response = await service.UpdateEventAsync(
-            Guid.NewGuid(),
-            new UpdateEventRequest
-            {
-                Title = "Updated Session",
-                Category = "workshop",
-                StartDateTime = FixedNow.AddHours(1),
-                EndDateTime = FixedNow.AddHours(2),
-                Color = "#2563EB"
-            },
-            CancellationToken.None
-        );
+        var updateEvent = () =>
+            service.UpdateEventAsync(
+                Guid.NewGuid(),
+                new UpdateEventRequest
+                {
+                    Title = "Updated Session",
+                    Category = "workshop",
+                    StartDateTime = FixedNow.AddHours(1),
+                    EndDateTime = FixedNow.AddHours(2),
+                    Color = "#2563EB"
+                },
+                CancellationToken.None
+            );
 
-        Assert.Null(response);
+        await Assert.ThrowsAsync<ApplicationNotFoundException>(updateEvent);
         Assert.Equal(0, repository.SaveChangesCallCount);
     }
 
@@ -254,9 +255,8 @@ public sealed class EventServiceTests
             utcNow: FixedNow.AddHours(3)
         );
 
-        var wasDeleted = await service.DeleteEventAsync(calendarEvent.Id, CancellationToken.None);
+        await service.DeleteEventAsync(calendarEvent.Id, CancellationToken.None);
 
-        Assert.True(wasDeleted);
         Assert.True(calendarEvent.IsDeleted);
         Assert.Equal(FixedNow.AddHours(3), calendarEvent.UpdatedAt);
         Assert.Equal(1, repository.SaveChangesCallCount);

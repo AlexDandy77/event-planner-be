@@ -1,4 +1,5 @@
 using EventPlanner.Api.Middleware;
+using EventPlanner.Api.Errors;
 using EventPlanner.Api.Services;
 using EventPlanner.Application;
 using EventPlanner.Application.Common.Abstractions;
@@ -158,6 +159,38 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseStatusCodePages(async statusCodeContext =>
+{
+    var httpContext = statusCodeContext.HttpContext;
+    var statusCode = httpContext.Response.StatusCode;
+
+    if (httpContext.Response.HasStarted || statusCode < StatusCodes.Status400BadRequest)
+    {
+        return;
+    }
+
+    var (title, detail) = statusCode switch
+    {
+        StatusCodes.Status400BadRequest => ("Bad Request", "The request could not be processed."),
+        StatusCodes.Status401Unauthorized => ("Unauthorized", "Authentication is required."),
+        StatusCodes.Status403Forbidden => ("Forbidden", "You do not have access to this resource."),
+        StatusCodes.Status404NotFound => ("Not Found", "The requested resource was not found."),
+        _ => ("Error", "The request failed.")
+    };
+
+    await ProblemDetailsResponseWriter.WriteAsync(
+        httpContext,
+        new ProblemDetails
+        {
+            Type = $"https://httpstatuses.com/{statusCode}",
+            Status = statusCode,
+            Title = title,
+            Detail = detail,
+            Instance = httpContext.Request.Path
+        }
+    );
+});
 
 app.UseCors(FrontendCorsPolicy);
 
