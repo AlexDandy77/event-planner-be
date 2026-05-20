@@ -5,6 +5,7 @@ using EventPlanner.Application.Events.Dtos;
 using EventPlanner.Application.Events.Queries;
 using EventPlanner.Application.Events.Repositories;
 using EventPlanner.Application.Events.Services;
+using EventPlanner.Application.Events.Validation;
 using EventPlanner.Application.Users.Repositories;
 using EventPlanner.Domain.Entities;
 using EventPlanner.Domain.Enums;
@@ -299,7 +300,10 @@ public sealed class EventServiceTests
             eventRepository,
             new FakeUserRepository(users),
             new FakeCurrentUserService(currentUser?.Id),
-            new FixedClock(utcNow ?? FixedNow)
+            new FixedClock(utcNow ?? FixedNow),
+            new EventQueryParametersValidator(),
+            new EventRequestValidator(),
+            new EventRequestValidator()
         );
     }
 

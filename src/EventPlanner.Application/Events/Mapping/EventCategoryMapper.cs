@@ -62,4 +62,21 @@ internal static class EventCategoryMapper
             $"Event category '{category}' is not supported."
         );
     }
+
+    public static bool IsSupportedContractValue(string? category)
+    {
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            return false;
+        }
+
+        var normalizedCategory = category.Trim();
+
+        return normalizedCategory.Equals("online", StringComparison.OrdinalIgnoreCase)
+            || normalizedCategory.Equals("inPerson", StringComparison.OrdinalIgnoreCase)
+            || normalizedCategory.Equals("hybrid", StringComparison.OrdinalIgnoreCase)
+            || normalizedCategory.Equals("workshop", StringComparison.OrdinalIgnoreCase)
+            || normalizedCategory.Equals("conference", StringComparison.OrdinalIgnoreCase)
+            || normalizedCategory.Equals("other", StringComparison.OrdinalIgnoreCase);
+    }
 }

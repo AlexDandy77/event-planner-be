@@ -5,6 +5,7 @@ using EventPlanner.Application.Common.Abstractions;
 using EventPlanner.Infrastructure;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 
@@ -22,6 +23,43 @@ var allowedOrigins = builder.Configuration
     .ToArray();
 
 builder.Services.AddControllers();
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context
+            .ModelState
+            .Where(entry => entry.Value?.Errors.Count > 0)
+            .ToDictionary(
+                entry => NormalizeModelStateKey(entry.Key),
+                entry =>
+                    entry
+                        .Value!
+                        .Errors
+                        .Select(error =>
+                            string.IsNullOrWhiteSpace(error.ErrorMessage)
+                                ? "The value is invalid."
+                                : error.ErrorMessage
+                        )
+                        .ToArray(),
+                StringComparer.Ordinal
+            );
+
+        var problemDetails = new ValidationProblemDetails(errors)
+        {
+            Type = "https://httpstatuses.com/400",
+            Status = StatusCodes.Status400BadRequest,
+            Title = "Validation failed",
+            Detail = "One or more validation errors occurred.",
+            Instance = context.HttpContext.Request.Path
+        };
+
+        return new BadRequestObjectResult(problemDetails)
+        {
+            ContentTypes = { "application/problem+json" }
+        };
+    };
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -130,3 +168,15 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static string NormalizeModelStateKey(string key)
+{
+    if (string.IsNullOrWhiteSpace(key))
+    {
+        return "request";
+    }
+
+    var lastSegment = key.Split('.').Last();
+
+    return char.ToLowerInvariant(lastSegment[0]) + lastSegment[1..];
+}

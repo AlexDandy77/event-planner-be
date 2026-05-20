@@ -2,6 +2,7 @@ using EventPlanner.Application.Auth.Abstractions;
 using EventPlanner.Application.Auth.Dtos;
 using EventPlanner.Application.Common.Abstractions;
 using EventPlanner.Application.Common.Exceptions;
+using EventPlanner.Application.Common.Validation;
 using EventPlanner.Application.Users.Dtos;
 using EventPlanner.Application.Users.Mapping;
 using EventPlanner.Application.Users.Repositories;
@@ -15,7 +16,9 @@ public sealed class AuthService(
     IPasswordHasher passwordHasher,
     IAuthTokenService authTokenService,
     ICurrentUserService currentUserService,
-    IClock clock
+    IClock clock,
+    IRequestValidator<RegisterRequest> registerRequestValidator,
+    IRequestValidator<LoginRequest> loginRequestValidator
 ) : IAuthService
 {
     private const int MinimumPasswordLength = 8;
@@ -24,7 +27,10 @@ public sealed class AuthService(
     private readonly IAuthTokenService _authTokenService = authTokenService;
     private readonly IClock _clock = clock;
     private readonly ICurrentUserService _currentUserService = currentUserService;
+    private readonly IRequestValidator<LoginRequest> _loginRequestValidator = loginRequestValidator;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
+    private readonly IRequestValidator<RegisterRequest> _registerRequestValidator =
+        registerRequestValidator;
     private readonly IUserRepository _userRepository = userRepository;
 
     public async Task<AuthResponse> RegisterAsync(
@@ -32,6 +38,8 @@ public sealed class AuthService(
         CancellationToken cancellationToken
     )
     {
+        _registerRequestValidator.Validate(request);
+
         var email = RequireEmail(request.Email);
         var password = RequirePassword(request.Password);
 
@@ -61,6 +69,8 @@ public sealed class AuthService(
         CancellationToken cancellationToken
     )
     {
+        _loginRequestValidator.Validate(request);
+
         var email = RequireEmail(request.Email);
         var password = RequireText(request.Password, "Password");
         var user = await _userRepository.GetByEmailAsync(email, cancellationToken);

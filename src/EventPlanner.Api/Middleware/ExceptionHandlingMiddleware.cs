@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using EventPlanner.Application.Common.Exceptions;
 using EventPlanner.Domain.Common;
 
@@ -10,6 +12,8 @@ public sealed class ExceptionHandlingMiddleware(
     ILogger<ExceptionHandlingMiddleware> logger
     )
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
     private readonly ILogger<ExceptionHandlingMiddleware> _logger = logger;
     private readonly RequestDelegate _next = next;
 
@@ -27,6 +31,15 @@ public sealed class ExceptionHandlingMiddleware(
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+        if (exception is ApplicationValidationException validationException)
+        {
+            _logger.LogWarning("Request failed with validation errors.");
+
+            await WriteValidationProblemAsync(context, validationException);
+
+            return;
+        }
+
         var (statusCode, title, detail, shouldLogAsError) = exception switch
         {
             ApplicationAuthenticationException => (
@@ -44,12 +57,6 @@ public sealed class ExceptionHandlingMiddleware(
             ApplicationConflictException => (
                 StatusCodes.Status409Conflict,
                 "Conflict",
-                exception.Message,
-                false
-            ),
-            ApplicationValidationException => (
-                StatusCodes.Status400BadRequest,
-                "Bad Request",
                 exception.Message,
                 false
             ),
@@ -87,6 +94,42 @@ public sealed class ExceptionHandlingMiddleware(
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/problem+json";
 
-        await context.Response.WriteAsJsonAsync(problemDetails);
+        await JsonSerializer.SerializeAsync(
+            context.Response.Body,
+            problemDetails,
+            problemDetails.GetType(),
+            JsonOptions
+        );
+    }
+
+    private static async Task WriteValidationProblemAsync(
+        HttpContext context,
+        ApplicationValidationException exception
+    )
+    {
+        var problemDetails = new ValidationProblemDetails(
+            exception.Errors.ToDictionary(
+                error => error.Key,
+                error => error.Value,
+                StringComparer.Ordinal
+            )
+        )
+        {
+            Type = "https://httpstatuses.com/400",
+            Status = StatusCodes.Status400BadRequest,
+            Title = "Validation failed",
+            Detail = "One or more validation errors occurred.",
+            Instance = context.Request.Path
+        };
+
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        context.Response.ContentType = "application/problem+json";
+
+        await JsonSerializer.SerializeAsync(
+            context.Response.Body,
+            problemDetails,
+            problemDetails.GetType(),
+            JsonOptions
+        );
     }
 }

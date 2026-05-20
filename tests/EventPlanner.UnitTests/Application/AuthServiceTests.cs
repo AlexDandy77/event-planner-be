@@ -2,6 +2,7 @@ using EventPlanner.Application.Auth.Abstractions;
 using EventPlanner.Application.Auth.Dtos;
 using EventPlanner.Application.Auth.Models;
 using EventPlanner.Application.Auth.Services;
+using EventPlanner.Application.Auth.Validation;
 using EventPlanner.Application.Common.Abstractions;
 using EventPlanner.Application.Common.Exceptions;
 using EventPlanner.Application.Users.Repositories;
@@ -139,7 +140,9 @@ public sealed class AuthServiceTests
             new FakePasswordHasher(),
             new FakeAuthTokenService(),
             new FakeCurrentUserService(currentUserId),
-            new FixedClock(FixedNow)
+            new FixedClock(FixedNow),
+            new RegisterRequestValidator(),
+            new LoginRequestValidator()
         );
     }
 

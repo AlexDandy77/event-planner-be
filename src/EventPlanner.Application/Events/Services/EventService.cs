@@ -1,6 +1,7 @@
 using EventPlanner.Application.Common.Abstractions;
 using EventPlanner.Application.Common.Dtos;
 using EventPlanner.Application.Common.Exceptions;
+using EventPlanner.Application.Common.Validation;
 using EventPlanner.Application.Events.Dtos;
 using EventPlanner.Application.Events.Mapping;
 using EventPlanner.Application.Events.Queries;
@@ -15,12 +16,21 @@ public sealed class EventService(
     IEventRepository eventRepository,
     IUserRepository userRepository,
     ICurrentUserService currentUserService,
-    IClock clock
+    IClock clock,
+    IRequestValidator<EventQueryParameters> queryParametersValidator,
+    IRequestValidator<CreateEventRequest> createEventRequestValidator,
+    IRequestValidator<UpdateEventRequest> updateEventRequestValidator
 ) : IEventService
 {
     private readonly IClock _clock = clock;
+    private readonly IRequestValidator<CreateEventRequest> _createEventRequestValidator =
+        createEventRequestValidator;
     private readonly ICurrentUserService _currentUserService = currentUserService;
     private readonly IEventRepository _eventRepository = eventRepository;
+    private readonly IRequestValidator<EventQueryParameters> _queryParametersValidator =
+        queryParametersValidator;
+    private readonly IRequestValidator<UpdateEventRequest> _updateEventRequestValidator =
+        updateEventRequestValidator;
     private readonly IUserRepository _userRepository = userRepository;
 
     public async Task<IReadOnlyList<EventResponse>> GetEventsAsync(
@@ -28,6 +38,8 @@ public sealed class EventService(
         CancellationToken cancellationToken
     )
     {
+        _queryParametersValidator.Validate(queryParameters);
+
         var query = BuildQuery(queryParameters);
         var events = await _eventRepository.GetAllAsync(query, cancellationToken);
 
@@ -49,6 +61,8 @@ public sealed class EventService(
         CancellationToken cancellationToken
     )
     {
+        _createEventRequestValidator.Validate(request);
+
         var currentUser = await GetCurrentActiveUserAsync(cancellationToken);
         var category = EventCategoryMapper.ToDomainValue(request.Category);
         var createdAt = _clock.UtcNow;
@@ -76,6 +90,8 @@ public sealed class EventService(
         CancellationToken cancellationToken
     )
     {
+        _updateEventRequestValidator.Validate(request);
+
         var calendarEvent = await _eventRepository.GetByIdAsync(id, cancellationToken);
 
         if (calendarEvent is null)

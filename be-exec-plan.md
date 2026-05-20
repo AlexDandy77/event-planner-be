@@ -470,9 +470,9 @@ Acceptance criteria:
 - Unauthorized users cannot create/update/delete events.
 - Async EF Core methods are used instead of sync database calls.
 
-## Week 6 - Validation, Error Handling, Tests, And Deployment Prep
+## Week 6 - Validation, Error Handling, Tests, And Deployment Prep [In-Progress]
 
-### Task 1 - Add Validation
+### Task 1 - Add Validation [Completed]
 
 Actions:
 
