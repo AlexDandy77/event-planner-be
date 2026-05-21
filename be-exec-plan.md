@@ -294,7 +294,7 @@ Acceptance criteria:
 - API starts with `dotnet run --project src/EventPlanner.Api/EventPlanner.Api.csproj`.
 - `GET /api/health` returns a successful response.
 
-### Task 2 - Add Domain Model Skeletons
+### Task 2 - Add Domain Model Skeletons [Completed]
 
 Actions:
 
