@@ -1,3 +1,4 @@
+using EventPlanner.Api.Filters;
 using EventPlanner.Application.Events.Dtos;
 using EventPlanner.Application.Events.Services;
 
@@ -13,6 +14,7 @@ public sealed class EventsController(IEventService eventService) : ControllerBas
     private readonly IEventService _eventService = eventService;
 
     [HttpGet]
+    [AllowedQueryParameters("from", "to", "category", "search", "sortBy", "sortDirection")]
     public async Task<ActionResult<IReadOnlyList<EventResponse>>> GetAll(
         [FromQuery] EventQueryParameters queryParameters,
         CancellationToken cancellationToken

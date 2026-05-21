@@ -58,6 +58,28 @@ public sealed class EventEndpointsTests
     }
 
     [Fact]
+    public async Task GetEvents_ShouldReturnValidationProblem_WhenQueryParameterIsUnknown()
+    {
+        using var factory = new EventPlannerApiFactory();
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/api/events?catgory=online&random=123");
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>(
+            JsonOptions
+        );
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+        Assert.NotNull(problem);
+        Assert.Contains("catgory", problem.Errors.Keys);
+        Assert.Contains("random", problem.Errors.Keys);
+        Assert.Contains(
+            "Query parameter 'catgory' is not supported.",
+            problem.Errors["catgory"]
+        );
+    }
+
+    [Fact]
     public async Task CreateEvent_ShouldReturnUnauthorizedProblem_WhenTokenIsMissing()
     {
         using var factory = new EventPlannerApiFactory();
