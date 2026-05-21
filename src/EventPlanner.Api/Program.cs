@@ -76,26 +76,19 @@ builder.Services.AddCors(options =>
     );
 });
 
-var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-var jwtAudience = builder.Configuration["Jwt:Audience"];
-var jwtSecret = builder.Configuration["Jwt:Secret"];
-
-if (string.IsNullOrWhiteSpace(jwtSecret))
-{
-    throw new InvalidOperationException("JWT secret is not configured.");
-}
-
 builder
     .Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        var jwtSecret = GetRequiredConfigurationValue(builder.Configuration, "Jwt:Secret");
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidIssuer = jwtIssuer,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidateAudience = true,
-            ValidAudience = jwtAudience,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
             ValidateLifetime = true,
@@ -145,6 +138,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+ValidateRequiredConfiguration(app.Configuration);
 
 if (app.Environment.IsDevelopment())
 {
@@ -201,6 +196,24 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static void ValidateRequiredConfiguration(IConfiguration configuration)
+{
+    _ = GetRequiredConfigurationValue(configuration, "ConnectionStrings:DefaultConnection");
+    _ = GetRequiredConfigurationValue(configuration, "Jwt:Secret");
+}
+
+static string GetRequiredConfigurationValue(IConfiguration configuration, string key)
+{
+    var value = configuration[key];
+
+    if (string.IsNullOrWhiteSpace(value))
+    {
+        throw new InvalidOperationException($"Configuration value '{key}' is not configured.");
+    }
+
+    return value;
+}
 
 static string NormalizeModelStateKey(string key)
 {

@@ -3,4 +3,7 @@ obj/
 TestResults/
 *.user
 *.suo
+.env
+.env.*
+!.env.example
 .vs/

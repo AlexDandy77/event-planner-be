@@ -11,10 +11,10 @@ The implementation should follow OOP and SOLID principles without adding unneces
 - This file is the single backend planning source of truth.
 - `../event-planner-fe/fe-exec-plan.md` expects backend integration in this order:
   - [Completed] Week 1: API contract alignment.
-  - Week 2: `GET /events` with static or seeded data.
-  - Week 3: full event CRUD.
-  - Week 4: filtering and sorting.
-  - Week 5: authentication endpoints.
+  - [Completed] Week 2: `GET /events` with static or seeded data.
+  - [Completed] Week 3: full event CRUD.
+  - [Completed] Week 4: filtering and sorting.
+  - [Completed] Week 5: authentication endpoints.
 - `event-planner-be` has been initialized as an ASP.NET Core Web API with layered projects.
 
 ## Recommended Architecture [Completed]
@@ -470,7 +470,7 @@ Acceptance criteria:
 - Unauthorized users cannot create/update/delete events.
 - Async EF Core methods are used instead of sync database calls.
 
-## Week 6 - Validation, Error Handling, Tests, And Deployment Prep [In-Progress]
+## Week 6 - Validation, Error Handling, Tests, And Deployment Prep [Completed]
 
 ### Task 1 - Add Validation [Completed]
 
@@ -511,7 +511,7 @@ Output:
 - Core backend behavior has coverage.
 - Refactors are safer.
 
-### Task 4 - Prepare For Azure
+### Task 4 - Prepare For Azure [Completed]
 
 Actions:
 
@@ -524,6 +524,9 @@ Actions:
 Output:
 
 - Backend is ready for optional basic Azure deployment.
+- `deployment.md` documents local user secrets, Docker Compose, and Azure environment variables.
+- `Dockerfile` can publish the API as a container image.
+- `docker-compose.yml` can run PostgreSQL and the API together for local deployment-style testing.
 
 Acceptance criteria:
 
@@ -546,7 +549,7 @@ When starting backend implementation, do this first:
 7. Implement event CRUD. [Completed]
 8. Add seed data. [Completed]
 9. Verify with Swagger. [Completed]
-10. Connect frontend `GET /events`.
+10. Connect frontend `GET /events`. [Completed]
 
 ## Recommended Packages
 
